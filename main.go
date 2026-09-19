@@ -11,7 +11,7 @@ func main() {
 	fmt.Println(count(os.Stdin))
 }
 
-funct count(r io.Reader) int {
+func count(r io.Reader) int {
 	scanner := bufio.NewScanner(r)
 
 	scanner.Split(bufio.ScanWords)
