@@ -1,6 +1,3 @@
-# clear
-
-
 ## .md
 ```
 #  Tokyo visit
@@ -22,7 +19,7 @@ $ x clear
 ```
 ```
 
-## 2026-04-01\.md
+## YYYY-MM-DD\.md
 
 ```
 #  Tokyo visit
@@ -55,7 +52,7 @@ $ x clear
 ```
 ```
 
-## 2026-04-01\.md
+## YYYY-MM-DD\.md
 
 ```
 #  Tokyo visit
