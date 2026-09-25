@@ -1,1 +1,31 @@
 # Project X
+
+Initialize a new Go module for your project:​ ​
+```
+go​​ ​​mod​​ ​​init​​ ​x​ 
+```
+
+To execute the test, use the go test tool like this:
+
+```
+go test -v
+```
+
+Run the command-line tool without building it first:
+
+```sh
+go run .
+```
+
+
+Build your command-line tool like this:​
+
+```
+$ ​​go​​ ​​build​
+```
+
+Install it globally
+
+``` 
+sudo cp x /usr/local/bin/x
+```
