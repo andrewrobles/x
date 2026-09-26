@@ -1,31 +1,35 @@
 package main
 
 import (
-
 	_ "embed"
 	"fmt"
 	"os/exec"
-
 )
 
-//go:embed scripts/archive.applescript
+//go:embed scripts/read-reminders.applescript
+var readRemindersScript string
 
-var archiveScript string
+func readReminders() (string, error) {
+	cmd := exec.Command("osascript", "-e", readRemindersScript)
 
-func archive() error {
-
-	cmd := exec.Command("osascript", "-e", archiveScript)
-	output, err := cmd.Output()
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("run archive script: %w", err)
+		return "", fmt.Errorf(
+			"read reminders: %w\n%s",
+			err,
+			output,
+		)
 	}
-	fmt.Print(string(output))
-	return nil
 
+	return string(output), nil
 }
 
 func main() {
-	if err := archive(); err != nil {
+	markdown, err := readReminders()
+	if err != nil {
 		fmt.Println(err)
+		return
 	}
+
+	fmt.Print(markdown)
 }
