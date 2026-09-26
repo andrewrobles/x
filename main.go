@@ -49,14 +49,22 @@ func readReminders() (string, error) {
 func writeArchive(markdown string) (string, error) {
 	filename := archiveFilename()
 
-	err := os.WriteFile(
+	file, err := os.OpenFile(
 		filename,
-		[]byte(markdown),
+		os.O_CREATE|os.O_WRONLY|os.O_APPEND,
 		0644,
 	)
-
 	if err != nil {
+		return "", fmt.Errorf("open archive: %w", err)
+	}
+	defer file.Close()
+
+	if _, err := file.WriteString(markdown); err != nil {
 		return "", fmt.Errorf("write archive: %w", err)
+	}
+
+	if err := file.Sync(); err != nil {
+		return "", fmt.Errorf("sync archive: %w", err)
 	}
 
 	return filename, nil
