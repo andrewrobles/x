@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"time"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -23,7 +24,11 @@ func archive() error {
 		return err
 	}
 
-	fmt.Printf("Wrote %s\n", filename)
+	if err := verifyArchive(filename, markdown); err != nil {
+		return err
+	}
+
+	fmt.Printf("Verified %s\n", filename)
 
 	return nil
 }
@@ -72,4 +77,17 @@ func writeArchive(markdown string) (string, error) {
 
 func archiveFilename() string {
 	return time.Now().Format("2006-01-02") + ".md"
+}
+
+func verifyArchive(filename, markdown string) error {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return fmt.Errorf("read archive for verification: %w", err)
+	}
+
+	if !strings.Contains(string(data), markdown) {
+		return fmt.Errorf("archive verification failed")
+	}
+
+	return nil
 }
