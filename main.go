@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"os/exec"
+	"time"
 )
 
 //go:embed scripts/read-reminders.applescript
