@@ -10,25 +10,41 @@ import (
 )
 
 func main() {
-	archive()
+	if err := archive(); err != nil {
+		fmt.Println("archive:", err)
+		os.Exit(1)
+	}
 }
 
 func archive() error {
+	// 1. Read
 	markdown, err := readReminders()
 	if err != nil {
 		return err
 	}
 
+	if strings.TrimSpace(markdown) == "" {
+		fmt.Println("No reminders to archive.")
+		return nil
+	}
+
+	// 2. Write
 	filename, err := writeArchive(markdown)
 	if err != nil {
 		return err
 	}
 
+	// 3. Verify
 	if err := verifyArchive(filename, markdown); err != nil {
 		return err
 	}
 
-	fmt.Printf("Verified %s\n", filename)
+	// 4. Delete
+	if err := deleteReminders(); err != nil {
+		return err
+	}
+
+	fmt.Printf("Archived reminders to %s\n", filename)
 
 	return nil
 }
@@ -87,6 +103,24 @@ func verifyArchive(filename, markdown string) error {
 
 	if !strings.Contains(string(data), markdown) {
 		return fmt.Errorf("archive verification failed")
+	}
+
+	return nil
+}
+
+//go:embed scripts/delete-reminders.applescript
+var deleteRemindersScript string
+
+func deleteReminders() error {
+	cmd := exec.Command("osascript", "-e", deleteRemindersScript)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf(
+			"delete reminders: %w\n%s",
+			err,
+			output,
+		)
 	}
 
 	return nil
