@@ -7,6 +7,16 @@ import (
 	"time"
 )
 
+func main() {
+	markdown, err := readReminders()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Print(markdown)
+}
+
 //go:embed scripts/read-reminders.applescript
 var readRemindersScript string
 
@@ -25,15 +35,6 @@ func readReminders() (string, error) {
 	return string(output), nil
 }
 
-func main() {
-	markdown, err := readReminders()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fmt.Print(markdown)
-}
 
 func archiveFilename() string {
 	return time.Now().Format("2006-01-02") + ".md"
