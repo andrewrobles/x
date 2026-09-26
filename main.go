@@ -33,3 +33,7 @@ func main() {
 
 	fmt.Print(markdown)
 }
+
+func archiveFilename() string {
+	return time.Now().Format("2006-01-02") + ".md"
+}
