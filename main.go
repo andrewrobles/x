@@ -7,6 +7,7 @@ import (
 	"time"
 	"os"
 	"strings"
+	"path/filepath"
 )
 
 func main() {
@@ -68,13 +69,20 @@ func readReminders() (string, error) {
 }
 
 func writeArchive(markdown string) (string, error) {
-	filename := archiveFilename()
+    filename, err := archiveFilename()
+    if err != nil {
+        return "", err
+    }
 
-	file, err := os.OpenFile(
-		filename,
-		os.O_CREATE|os.O_WRONLY|os.O_APPEND,
-		0644,
-	)
+    if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
+        return "", fmt.Errorf("create archive dir: %w", err)
+    }
+
+    file, err := os.OpenFile(
+        filename,
+        os.O_CREATE|os.O_WRONLY|os.O_APPEND,
+        0644,
+    )
 	if err != nil {
 		return "", fmt.Errorf("open archive: %w", err)
 	}
@@ -91,8 +99,12 @@ func writeArchive(markdown string) (string, error) {
 	return filename, nil
 }
 
-func archiveFilename() string {
-	return time.Now().Format("2006-01-02") + ".md"
+func archiveFilename() (string, error) {
+    home, err := os.UserHomeDir()
+    if err != nil {
+        return "", fmt.Errorf("get home dir: %w", err)
+    }
+    return filepath.Join(home, "Reminders", time.Now().Format("2006-01-02")+".md"), nil
 }
 
 func verifyArchive(filename, markdown string) error {
