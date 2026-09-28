@@ -40,7 +40,12 @@ func archive() error {
 		return err
 	}
 
-	// 4. Delete
+	// 4. Commit
+    if err := commitArchive(); err != nil {
+        return err
+    }
+
+	// 5. Delete
 	if err := deleteReminders(); err != nil {
 		return err
 	}
@@ -48,6 +53,42 @@ func archive() error {
 	fmt.Printf("Archived reminders to %s\n", filename)
 
 	return nil
+}
+
+func commitArchive() error {
+    home, err := os.UserHomeDir()
+    if err != nil {
+        return fmt.Errorf("get home dir: %w", err)
+    }
+    dir := filepath.Join(home, "Reminders")
+
+    if _, err := os.Stat(filepath.Join(dir, ".git")); os.IsNotExist(err) {
+        if err := runGit(dir, "init"); err != nil {
+            return err
+        }
+    }
+
+    if err := runGit(dir, "add", "-A"); err != nil {
+        return err
+    }
+
+    // git rejects "" as a message unless explicitly allowed
+    if err := runGit(dir, "commit", "--allow-empty-message", "-m", ""); err != nil {
+        return err
+    }
+
+    return nil
+}
+
+func runGit(dir string, args ...string) error {
+    cmd := exec.Command("git", append([]string{"-C", dir}, args...)...)
+
+    output, err := cmd.CombinedOutput()
+    if err != nil {
+        return fmt.Errorf("git %s: %w\n%s", strings.Join(args, " "), err, output)
+    }
+
+    return nil
 }
 
 //go:embed scripts/read-reminders.applescript
