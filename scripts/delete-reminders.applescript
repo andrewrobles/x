@@ -1,7 +1,8 @@
 tell application "Reminders"
-    repeat with reminderList in lists
+    set listNames to name of every list
+    repeat with listName in listNames
         try
-            delete reminderList
+            delete list listName
         end try
     end repeat
 end tell
