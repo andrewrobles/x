@@ -11,10 +11,21 @@ import (
 )
 
 func main() {
-	if err := archive(); err != nil {
-		fmt.Println("archive:", err)
-		os.Exit(1)
-	}
+    if len(os.Args) < 2 {
+        fmt.Println("usage: x <command>")
+        os.Exit(1)
+    }
+
+    switch os.Args[1] {
+    case "archive":
+        if err := archive(); err != nil {
+            fmt.Println("archive:", err)
+            os.Exit(1)
+        }
+    default:
+        fmt.Printf("unknown command: %s\n", os.Args[1])
+        os.Exit(1)
+    }
 }
 
 func archive() error {
