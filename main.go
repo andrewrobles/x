@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 )
 
+var version = "0.0.0"
+
 func main() {
     if len(os.Args) < 2 {
         fmt.Println("usage: x <command>")
@@ -17,6 +19,8 @@ func main() {
     }
 
     switch os.Args[1] {
+    case "-v", "--version":
+        fmt.Println(version)
     case "archive":
         if err := archive(); err != nil {
             fmt.Println("archive:", err)
