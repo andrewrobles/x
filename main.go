@@ -14,7 +14,8 @@ var version = "0.0.0"
 
 func main() {
     if len(os.Args) < 2 {
-        fmt.Println("usage: x <command>")
+	fmt.Println(`usage: x [-v | --version]
+         <command>`)
         os.Exit(1)
     }
 
