@@ -146,18 +146,18 @@ func remindersMarkdown(lists []reminderList) string {
 	var markdown strings.Builder
 
 	for _, list := range lists {
-		markdown.WriteString(list.Name + "\n")
+		markdown.WriteString(list.Name + "  \n")
 
 		for _, item := range list.Reminders {
 			checkbox := "- [ ] "
 			if item.Completed {
 				checkbox = "- [x] "
 			}
-			markdown.WriteString(checkbox + item.Name + "\n")
+			markdown.WriteString(checkbox + item.Name + "  \n")
 
 			if notes := strings.TrimSpace(item.Notes); notes != "" {
 				for _, line := range strings.Split(normalizeNewlines(item.Notes), "\n") {
-					markdown.WriteString("  > " + line + "\n")
+					markdown.WriteString("  > " + line + "  \n")
 				}
 			}
 		}
