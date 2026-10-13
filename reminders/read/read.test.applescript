@@ -43,16 +43,16 @@ end assertJSON
 on testRemindersToJSON()
     my assertJSON("No lists", {}, "[]")
 
-    my assertJSON("Empty lists omitted", Â
-        {{listName:"Empty", reminderItems:{}}}, Â
+    my assertJSON("Empty lists omitted", Â¬
+        {{listName:"Empty", reminderItems:{}}}, Â¬
         "[]")
 
-    set sampleData to {Â
-        {listName:"Empty", reminderItems:{}}, Â
-        {listName:"Groceries", reminderItems:{Â
-            {reminderName:"Buy milk", isCompleted:false}, Â
-            {reminderName:"Buy coffee", isCompleted:true}}}, Â
-        {listName:"Work", reminderItems:{Â
+    set sampleData to {Â¬
+        {listName:"Empty", reminderItems:{}}, Â¬
+        {listName:"Groceries", reminderItems:{Â¬
+            {reminderName:"Buy milk", isCompleted:false}, Â¬
+            {reminderName:"Buy coffee", isCompleted:true}}}, Â¬
+        {listName:"Work", reminderItems:{Â¬
             {reminderName:"Review PR", isCompleted:false}}}}
 
     set expectedJSON to "[{\"name\":\"Groceries\",\"reminders\":[{\"name\":\"Buy milk\",\"completed\":false},{\"name\":\"Buy coffee\",\"completed\":true}]},{\"name\":\"Work\",\"reminders\":[{\"name\":\"Review PR\",\"completed\":false}]}]"
@@ -60,7 +60,7 @@ on testRemindersToJSON()
     my assertJSON("Completion flags and list order", sampleData, expectedJSON)
 
     set escapedTitle to "Quote \" and slash \\ and newline" & linefeed & "next"
-    set sampleData to {{listName:"List \"A\"", reminderItems:{Â
+    set sampleData to {{listName:"List \"A\"", reminderItems:{Â¬
         {reminderName:escapedTitle, isCompleted:false}}}}
 
     set expectedJSON to "[{\"name\":\"List \\\"A\\\"\",\"reminders\":[{\"name\":\"Quote \\\" and slash \\\\ and newline\\nnext\",\"completed\":false}]}]"
