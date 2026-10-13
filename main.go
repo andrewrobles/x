@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"encoding/json"
 	"fmt"
 	"os/exec"
 	"time"
@@ -107,8 +108,19 @@ func runGit(dir string, args ...string) error {
     return nil
 }
 
-//go:embed scripts/read-reminders.applescript
+//go:embed scripts/read-reminders/read-reminders.applescript
 var readRemindersScript string
+
+type reminderList struct {
+	Name      string         `json:"name"`
+	Reminders []reminderItem `json:"reminders"`
+}
+
+type reminderItem struct {
+	Name      string `json:"name"`
+	Notes     string `json:"notes"`
+	Completed bool   `json:"completed"`
+}
 
 func readReminders() (string, error) {
 	cmd := exec.Command("osascript", "-e", readRemindersScript)
@@ -122,7 +134,44 @@ func readReminders() (string, error) {
 		)
 	}
 
-	return string(output), nil
+	var lists []reminderList
+	if err := json.Unmarshal(output, &lists); err != nil {
+		return "", fmt.Errorf("parse reminders: %w\n%s", err, output)
+	}
+
+	return remindersMarkdown(lists), nil
+}
+
+func remindersMarkdown(lists []reminderList) string {
+	var markdown strings.Builder
+
+	for _, list := range lists {
+		markdown.WriteString(list.Name + "\n")
+
+		for _, item := range list.Reminders {
+			checkbox := "- [ ] "
+			if item.Completed {
+				checkbox = "- [x] "
+			}
+			markdown.WriteString(checkbox + item.Name + "\n")
+
+			if notes := strings.TrimSpace(item.Notes); notes != "" {
+				for _, line := range strings.Split(normalizeNewlines(item.Notes), "\n") {
+					markdown.WriteString("  > " + line + "\n")
+				}
+			}
+		}
+
+		markdown.WriteString("\n")
+	}
+
+	return markdown.String()
+}
+
+func normalizeNewlines(s string) string {
+	s = strings.ReplaceAll(s, "\r\n", "\n")
+	s = strings.ReplaceAll(s, "\r", "\n")
+	return s
 }
 
 func writeArchive(markdown string) (string, error) {
