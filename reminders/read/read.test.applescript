@@ -50,20 +50,21 @@ on testRemindersToJSON()
     set sampleData to {¬
         {listName:"Empty", reminderItems:{}}, ¬
         {listName:"Groceries", reminderItems:{¬
-            {reminderName:"Buy milk", isCompleted:false}, ¬
-            {reminderName:"Buy coffee", isCompleted:true}}}, ¬
+            {reminderName:"Buy milk", reminderNotes:"Get two cartons of oat milk.", isCompleted:false}, ¬
+            {reminderName:"Buy coffee", reminderNotes:"Pick up whole-bean coffee.", isCompleted:true}}}, ¬
         {listName:"Work", reminderItems:{¬
-            {reminderName:"Review PR", isCompleted:false}}}}
+            {reminderName:"Review PR", reminderNotes:"Check the tests before approving.", isCompleted:false}}}}
 
-    set expectedJSON to "[{\"name\":\"Groceries\",\"reminders\":[{\"name\":\"Buy milk\",\"completed\":false},{\"name\":\"Buy coffee\",\"completed\":true}]},{\"name\":\"Work\",\"reminders\":[{\"name\":\"Review PR\",\"completed\":false}]}]"
+    set expectedJSON to "[{\"name\":\"Groceries\",\"reminders\":[{\"name\":\"Buy milk\",\"notes\":\"Get two cartons of oat milk.\",\"completed\":false},{\"name\":\"Buy coffee\",\"notes\":\"Pick up whole-bean coffee.\",\"completed\":true}]},{\"name\":\"Work\",\"reminders\":[{\"name\":\"Review PR\",\"notes\":\"Check the tests before approving.\",\"completed\":false}]}]"
 
     my assertJSON("Completion flags and list order", sampleData, expectedJSON)
 
     set escapedTitle to "Quote \" and slash \\ and newline" & linefeed & "next"
+    set escapedNotes to "Notes with \" quote and \\ backslash" & linefeed & "more"
     set sampleData to {{listName:"List \"A\"", reminderItems:{¬
-        {reminderName:escapedTitle, isCompleted:false}}}}
+        {reminderName:escapedTitle, reminderNotes:escapedNotes, isCompleted:false}}}}
 
-    set expectedJSON to "[{\"name\":\"List \\\"A\\\"\",\"reminders\":[{\"name\":\"Quote \\\" and slash \\\\ and newline\\nnext\",\"completed\":false}]}]"
+    set expectedJSON to "[{\"name\":\"List \\\"A\\\"\",\"reminders\":[{\"name\":\"Quote \\\" and slash \\\\ and newline\\nnext\",\"notes\":\"Notes with \\\" quote and \\\\ backslash\\nmore\",\"completed\":false}]}]"
 
     my assertJSON("JSON escaping", sampleData, expectedJSON)
 

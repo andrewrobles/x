@@ -20,9 +20,11 @@ on readReminderLists()
             repeat with r in reminders of reminderList
                 set reminderTitle to name of r
                 set reminderCompleted to completed of r
+                set reminderBody to body of r
 
                 set end of collectedReminders to {¬
                     reminderName:reminderTitle, ¬
+                    reminderNotes:reminderBody, ¬
                     isCompleted:reminderCompleted}
             end repeat
 
@@ -49,9 +51,10 @@ on reminderListsToJSON(reminderLists)
 
             repeat with reminderRecord in reminderRecords
                 set title to reminderName of reminderRecord
+                set notesValue to reminderNotes of reminderRecord
                 set doneValue to current application's NSNumber's numberWithBool:(isCompleted of reminderRecord)
 
-                set entry to current application's NSDictionary's dictionaryWithObjects:{title, doneValue} forKeys:{"name", "completed"}
+                set entry to current application's NSDictionary's dictionaryWithObjects:{title, notesValue, doneValue} forKeys:{"name", "notes", "completed"}
                 reminderData's addObject:entry
             end repeat
 
