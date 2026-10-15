@@ -1,39 +1,36 @@
 package main
 
 import (
-    _ "embed"
-    "encoding/json"
-    "fmt"
-    "os/exec"
-    "strings"
+	_ "embed"
+	"encoding/json"
+	"fmt"
+	"os/exec"
+	"strings"
 )
 
 func archiveReminders() error {
-    markdown, err := readReminders()
-    if err != nil {
-        return err
-    }
+	markdown, err := readReminders()
+	if err != nil {
+		return err
+	}
 
-    if strings.TrimSpace(markdown) == "" {
-        fmt.Println("No reminders to archive.")
-        return nil
-    }
+	if strings.TrimSpace(markdown) == "" {
+		fmt.Println("No reminders to archive.")
+		return nil
+	}
 
-    filename, err := archiveMarkdown("Reminders", markdown)
-    if err != nil {
-        return err
-    }
+	filename, err := archiveMarkdown("Reminders", markdown)
+	if err != nil {
+		return err
+	}
 
-    if err := deleteReminders(); err != nil {
-        return err
-    }
+	if err := deleteReminders(); err != nil {
+		return err
+	}
 
-    fmt.Printf("Archived reminders to %s\n", filename)
-    return nil
+	fmt.Printf("Archived reminders to %s\n", filename)
+	return nil
 }
-
-
-
 
 //go:embed scripts/read-reminders/read-reminders.applescript
 var readRemindersScript string
