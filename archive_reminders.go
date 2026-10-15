@@ -1,0 +1,223 @@
+package main
+
+import (
+    _ "embed"
+    "encoding/json"
+    "fmt"
+    "os"
+    "os/exec"
+    "path/filepath"
+    "strings"
+    "time"
+)
+
+func archive_reminders() error {
+	// 1. Read
+	markdown, err := readReminders()
+	if err != nil {
+		return err
+	}
+
+	if strings.TrimSpace(markdown) == "" {
+		fmt.Println("No reminders to archive.")
+		return nil
+	}
+
+	// 2. Write
+	filename, err := writeArchive(markdown)
+	if err != nil {
+		return err
+	}
+
+	// 3. Verify
+	if err := verifyArchive(filename, markdown); err != nil {
+		return err
+	}
+
+	// 4. Commit
+    if err := commitArchive(); err != nil {
+        return err
+    }
+
+	// 5. Delete
+	if err := deleteReminders(); err != nil {
+		return err
+	}
+
+	fmt.Printf("Archived reminders to %s\n", filename)
+
+	return nil
+}
+
+func commitArchive() error {
+    home, err := os.UserHomeDir()
+    if err != nil {
+        return fmt.Errorf("get home dir: %w", err)
+    }
+    dir := filepath.Join(home, "Reminders")
+
+    if _, err := os.Stat(filepath.Join(dir, ".git")); os.IsNotExist(err) {
+        if err := runGit(dir, "init"); err != nil {
+            return err
+        }
+    }
+
+    if err := runGit(dir, "add", "-A"); err != nil {
+        return err
+    }
+
+    // git rejects "" as a message unless explicitly allowed
+    if err := runGit(dir, "commit", "--allow-empty-message", "-m", ""); err != nil {
+        return err
+    }
+
+    return nil
+}
+
+func runGit(dir string, args ...string) error {
+    cmd := exec.Command("git", append([]string{"-C", dir}, args...)...)
+
+    output, err := cmd.CombinedOutput()
+    if err != nil {
+        return fmt.Errorf("git %s: %w\n%s", strings.Join(args, " "), err, output)
+    }
+
+    return nil
+}
+
+//go:embed scripts/read-reminders/read-reminders.applescript
+var readRemindersScript string
+
+type reminderList struct {
+	Name      string         `json:"name"`
+	Reminders []reminderItem `json:"reminders"`
+}
+
+type reminderItem struct {
+	Name      string `json:"name"`
+	Notes     string `json:"notes"`
+	Completed bool   `json:"completed"`
+}
+
+func readReminders() (string, error) {
+	cmd := exec.Command("osascript", "-e", readRemindersScript)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf(
+			"read reminders: %w\n%s",
+			err,
+			output,
+		)
+	}
+
+	var lists []reminderList
+	if err := json.Unmarshal(output, &lists); err != nil {
+		return "", fmt.Errorf("parse reminders: %w\n%s", err, output)
+	}
+
+	return remindersMarkdown(lists), nil
+}
+
+func remindersMarkdown(lists []reminderList) string {
+	var markdown strings.Builder
+
+	for _, list := range lists {
+		markdown.WriteString(list.Name + "  \n")
+
+		for _, item := range list.Reminders {
+			checkbox := "- [ ] "
+			if item.Completed {
+				checkbox = "- [x] "
+			}
+			markdown.WriteString(checkbox + item.Name + "  \n")
+
+			if notes := strings.TrimSpace(item.Notes); notes != "" {
+				for _, line := range strings.Split(normalizeNewlines(item.Notes), "\n") {
+					markdown.WriteString("  > " + line + "  \n")
+				}
+			}
+		}
+
+		markdown.WriteString("\n")
+	}
+
+	return markdown.String()
+}
+
+func normalizeNewlines(s string) string {
+	s = strings.ReplaceAll(s, "\r\n", "\n")
+	s = strings.ReplaceAll(s, "\r", "\n")
+	return s
+}
+
+func writeArchive(markdown string) (string, error) {
+    filename, err := archiveFilename()
+    if err != nil {
+        return "", err
+    }
+
+    if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
+        return "", fmt.Errorf("create archive dir: %w", err)
+    }
+
+    file, err := os.OpenFile(
+        filename,
+        os.O_CREATE|os.O_WRONLY|os.O_EXCL,
+        0644,
+    )
+	if err != nil {
+		return "", fmt.Errorf("open archive: %w", err)
+	}
+	defer file.Close()
+
+	if _, err := file.WriteString(markdown); err != nil {
+		return "", fmt.Errorf("write archive: %w", err)
+	}
+
+	if err := file.Sync(); err != nil {
+		return "", fmt.Errorf("sync archive: %w", err)
+	}
+
+	return filename, nil
+}
+
+func archiveFilename() (string, error) {
+    home, err := os.UserHomeDir()
+    if err != nil {
+        return "", fmt.Errorf("get home dir: %w", err)
+    }
+	timestamp := time.Now().Format("2006-01-02T15-04-05")
+    return filepath.Join(home, "Reminders", timestamp+".md"), nil
+}
+
+func verifyArchive(filename, markdown string) error {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return fmt.Errorf("read archive for verification: %w", err)
+	}
+
+	if string(data) != markdown {
+		return fmt.Errorf("archive verification failed")
+	}
+
+	return nil
+}
+
+//go:embed scripts/delete-reminders.applescript
+var deleteRemindersScript string
+
+func deleteReminders() error {
+	cmd := exec.Command("osascript", "-e", deleteRemindersScript)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf(
+			"delete reminders: %w\n%s",
+			err,
+			output,
+		)
+	}
+
+	return nil
+}
