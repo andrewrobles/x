@@ -22,6 +22,11 @@ func main() {
             fmt.Println("reminders:", err)
             os.Exit(1)
         }
+    case "notepad":
+        if err := archiveNotepad(); err != nil {
+            fmt.Println("notepad:", err)
+            os.Exit(1)
+        }
     default:
         fmt.Printf("unknown command: %s\n", os.Args[1])
         os.Exit(1)
