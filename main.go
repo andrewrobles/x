@@ -9,8 +9,16 @@ var version = "0.0.0"
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println(`usage: x [-v | --version]
-         <command>`)
+		fmt.Println(`Usage:
+  x <command>
+  x -v | --version
+
+Commands:
+  reminders  Archive reminders, commit, then delete them
+  notepad    Archive ~/Notepad/.md, commit, then empty it
+
+Options:
+  -v, --version  Print version`)
 		os.Exit(1)
 	}
 
