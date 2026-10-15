@@ -186,7 +186,7 @@ func writeArchive(markdown string) (string, error) {
 
     file, err := os.OpenFile(
         filename,
-        os.O_CREATE|os.O_WRONLY|os.O_APPEND,
+        os.O_CREATE|os.O_WRONLY|os.O_EXCL,
         0644,
     )
 	if err != nil {
@@ -210,7 +210,8 @@ func archiveFilename() (string, error) {
     if err != nil {
         return "", fmt.Errorf("get home dir: %w", err)
     }
-    return filepath.Join(home, "Reminders", time.Now().Format("2006-01-02")+".md"), nil
+	timestamp := time.Now().Format("2006-01-02T15-04-05")
+    return filepath.Join(home, "Reminders", timestamp+".md"), nil
 }
 
 func verifyArchive(filename, markdown string) error {
@@ -219,7 +220,7 @@ func verifyArchive(filename, markdown string) error {
 		return fmt.Errorf("read archive for verification: %w", err)
 	}
 
-	if !strings.Contains(string(data), markdown) {
+	if string(data) != markdown {
 		return fmt.Errorf("archive verification failed")
 	}
 
