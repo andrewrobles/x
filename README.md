@@ -17,7 +17,7 @@ sudo cp x /usr/local/bin/x
 ## Archive reminders
 
 ```sh
-x archive
+x reminders 
 ```
 
 Each archive is saved as a separate Markdown file in `~/Reminders`, named

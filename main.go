@@ -23,9 +23,9 @@ func main() {
     switch os.Args[1] {
     case "-v", "--version":
         fmt.Println(version)
-    case "archive":
+    case "reminders":
         if err := archive(); err != nil {
-            fmt.Println("archive:", err)
+            fmt.Println("reminders:", err)
             os.Exit(1)
         }
     default:
